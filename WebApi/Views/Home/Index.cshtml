@@ -1,0 +1,183 @@
+﻿
+@{
+    Layout = "../Shared/_Layout.cshtml";
+}
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+</head>
+<!--delete code from ViewStart-->
+
+<!--move code to another separated js-file -->
+
+
+<div id="tableBlock"></div>
+<div id="editBlock">
+    <p><b>Редактирование пользователя</b></p>
+    <table>
+        <tr><td><input type="hidden" id="editId" /></td><td></td></tr>
+        <tr><td><label>Имя: </label></td><td><input type="text" id="editName" /></td></tr>
+        <tr><td><label>Фамилия: </label></td><td><input type="text" id="editSurname" /></td></tr>
+        <tr><td><label>Возраст: </label></td><td><input type="number" id="editAge" /></td></tr>
+    </table>
+    <button id="editPerson">Сохранить</button>
+</div>
+<div id="createBlock">
+    <p><b>Добавление пользователя</b></p>
+    <table>
+        
+        <tr><td><label>Имя: </label></td><td><input type="text" id="addName" /></td></tr>
+        <tr><td><label>Фамилия: </label></td><td><input type="text" id="addSurname" /></td></tr>
+        <tr><td><label>Возраст: </label></td><td><input type="number" id="addAge" /></td></tr>
+    </table>
+    <button id="addPerson">Сохранить</button>
+</div>
+
+
+@section scripts
+{
+<script type="text/javascript">
+ $(document).ready(function () {
+
+    GetAllPersons();
+    $("#editPerson").click(function(event){
+        event.preventDefault();
+        EditPerson($("#editId").val());
+    })
+
+    $("#addPerson").click(function(event){
+        event.preventDefault();
+        var person={
+            Name: $("#addName").val(),
+            Surname: $("#addSurname").val(),
+            Age: $("#addAge").val()
+        }
+
+        AddPerson(person);
+    })
+
+ });
+
+function GetAllPersons(){
+   $("#createBlock").css('display', 'block');
+   $("#editBlock").css('display', 'none');
+
+   $.ajax({
+       url: 'api/main',
+       type: 'Get',
+       dataType: 'json',
+       success: function(data){
+           WriteResponse(data);
+       }
+   });
+}
+
+function WriteResponse(persons)
+{
+    var strResult = "<table><th>ID</th><th>Имя</th><th>Фамилия</th><th>Возраст</th>";
+       $.each(persons,function(index,person){
+           strResult+="<tr><td>"+person.Id+"</td><td>"+person.Name+"</td><td>"+person.Surname+"</td><td>"+person.Age+"</td>"
+           +"<td><a id='editItem' data-item='" + person.Id + "' onclick='EditItem(this);' >Редактировать</a></td>" +
+            "<td><a id='delItem' data-item='" + person.Id + "' onclick='DeleteItem(this);' >Удалить</a></td></tr>"
+       });
+        strResult += "</table>";
+
+        $("#tableBlock").html(strResult);
+}
+
+
+function AddPerson(person)
+{
+   $.ajax({
+       url: "api/main",
+       type: "POST",
+       contentType: "application/json;charset=utf-8",
+       data: JSON.stringify(person),
+       success: function(data)
+       {
+           GetAllPersons();
+           console.log("created successfully");
+       }
+   })
+}
+ 
+
+function DeleteItem(el){
+
+var id=$(el).attr("data-item");
+DeletePerson(id);
+}
+
+function DeletePerson(id)
+{
+    $.ajax({
+        url:"api/main/"+id,
+        type: "DELETE",
+        success: function(data){
+            GetAllPersons();
+        }
+
+
+    })
+}
+
+function EditItem(el)
+{
+    var id=$(el).attr("data-item");
+    $.ajax({
+        url:"api/main/"+id,
+        type:"GET",
+        dataType: 'json',
+        success: function(data){
+        ShowPerson(data);
+        },
+        error: function(){
+            console.log("error from EditItem method");
+        }
+    });
+}
+
+function ShowPerson(person)
+{
+    if(person!=null)
+    {
+        $("#editBlock").css("display","block");
+        $("#createBlock").css("display","none");
+        $("#editId").val(person.Id);
+         $("#editName").val(person.Name);
+         $("#editSurname").val(person.Surname);
+         $("#editAge").val(person.Age);
+    }
+    else 
+    {
+            alert("Такая книга не существует");
+    }
+}
+
+function EditPerson(id)
+{
+var person={
+    Id: id,
+    Name:$("#editName").val(),
+    Surname: $("#editSurname").val(),
+    Age: $("#editAge").val()
+}
+
+  $.ajax({
+      url: "api/main/"+id,
+      type: "PUT",
+      contentType: "application/json;charset=utf-8",
+      data: JSON.stringify(person),
+      success: function(data){
+          GetAllPersons();
+      },
+      error: function(){
+            console.log("error from EditPerson method"+person.Id+person.Name+"fre");
+        }
+    
+  }) 
+}
+
+</script>
+}
+
