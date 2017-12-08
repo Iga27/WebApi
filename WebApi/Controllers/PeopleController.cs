@@ -43,7 +43,7 @@ namespace WebApi.Controllers
        // [ResponseType(typeof(Person))]
         public SingleResult<Person>  GetPerson([FromODataUri] int key)
         { //IHttpActionResult
-          // return Ok(db.Persons.Where(person => person.Id == key));
+          // return Ok(db.Persons.Where(person => person.Id == key)); ////
             return SingleResult.Create<Person>(db.Persons.Where(person => person.Id == key));
         }
 

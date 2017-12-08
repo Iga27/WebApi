@@ -25,7 +25,7 @@ namespace WebApi.Controllers
 
         // GET: api/Main/5
         [ResponseType(typeof(Person))]
-        public IHttpActionResult GetPerson(int id)
+        public IHttpActionResult GetPerson(int id)//   //
         {
             Person person = db.Persons.Find(id);
             if (person == null)
